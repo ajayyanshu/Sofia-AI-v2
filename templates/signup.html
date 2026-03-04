@@ -1,0 +1,356 @@
+<!DOCTYPE html> 
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Sofia AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f6f5f7;
+        }
+        .auth-main-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+            position: relative;
+            overflow: hidden;
+            width: 420px;
+            max-width: 100%;
+        }
+        .form-container {
+            background-color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 2rem 50px;
+            text-align: center;
+        }
+         .auth-main-container input {
+            background-color: #f6f5f7;
+            border: 1px solid transparent;
+            padding: 12px 15px;
+            margin-top: 0.5rem;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease-in-out;
+        }
+        .auth-main-container input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            background-color: #fff;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .auth-main-container button {
+            border-radius: 20px;
+            border: 1px solid #FF4B2B;
+            background-color: #FF4B2B;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 12px 45px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform 80ms ease-in;
+            cursor: pointer;
+            margin-top: 1.5rem;
+        }
+        .auth-main-container button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        .auth-main-container button:disabled {
+            background-color: #ccc;
+            border-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .otp-input-field {
+            letter-spacing: 0.5rem;
+            font-weight: bold;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .resend-btn {
+            background: none;
+            border: none;
+            color: #3B82F6;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 8px;
+            margin-left: 5px;
+        }
+        
+        .resend-btn:disabled {
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 480px) {
+            .form-container {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+             body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center h-full">
+
+    <div class="auth-main-container">
+        <div class="form-container" id="auth-content">
+            <form id="sign-up-form" autocomplete="off">
+                <h1 class="text-3xl font-bold mb-2">Create Account</h1>
+                <span class="text-sm text-gray-500 mb-4">Join Sofia AI today</span>
+                
+                <div class="w-full text-left">
+                    <label for="signup-name" class="text-sm font-medium text-gray-700">Name</label>
+                    <input type="text" id="signup-name" placeholder="Your Name" required autocomplete="name" />
+                </div>
+                
+                <div class="w-full text-left mt-2">
+                    <label for="signup-email" class="text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="signup-email" placeholder="your@email.com" required autocomplete="email" />
+                </div>
+
+                <div class="w-full text-left mt-2">
+                    <label for="signup-password" class="text-sm font-medium text-gray-700">Password</label>
+                    <div class="relative">
+                        <input type="password" id="signup-password" placeholder="Password (8+ characters)" required autocomplete="new-password" minlength="8" />
+                        <i class="fas fa-eye absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-gray-500" id="password-toggle-icon" style="top: calc(50% + 4px);"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full" id="signup-submit-btn">Sign Up</button>
+                <p id="signup-error" class="text-red-500 text-sm mt-2 h-5"></p>
+                <p class="mt-4 text-sm">
+                    Already have an account? 
+                    <a href="/login" class="font-semibold text-blue-600 hover:underline">Sign In</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const authContent = document.getElementById('auth-content');
+        const signUpForm = document.getElementById('sign-up-form');
+        let tempUserEmail = "";
+        let resendTimer = null;
+        let countdown = 5; // Changed from 60 to 5 seconds
+
+        // --- Toggle Password Visibility ---
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'password-toggle-icon') {
+                const passwordInput = document.getElementById('signup-password');
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                e.target.classList.toggle('fa-eye');
+                e.target.classList.toggle('fa-eye-slash');
+            }
+        });
+
+        // --- Handle Sign Up Form Submission ---
+        signUpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const errorEl = document.getElementById('signup-error');
+            const submitBtn = document.getElementById('signup-submit-btn');
+
+            tempUserEmail = email; 
+            errorEl.textContent = '';
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Sending OTP...";
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showOTPVerificationUI(email);
+                    startResendTimer();
+                } else {
+                    errorEl.textContent = data.error || "An unknown error occurred.";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Sign Up";
+                }
+            } catch (error) {
+                console.error('Signup Error:', error);
+                errorEl.textContent = "Could not connect to the server.";
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Sign Up";
+            }
+        });
+
+        // --- Function to Show OTP Input UI ---
+        function showOTPVerificationUI(email) {
+            authContent.innerHTML = `
+                <div class="w-full">
+                    <h1 class="text-3xl font-bold mb-4">Verify Email</h1>
+                    <p class="text-sm text-gray-500 mb-6">
+                        We sent a 6-digit code to <br><span class="font-semibold text-gray-800">${email}</span>
+                    </p>
+                    
+                    <div class="w-full text-left">
+                        <label for="otp-code" class="text-sm font-medium text-gray-700">Enter OTP</label>
+                        <input type="text" id="otp-code" class="otp-input-field" placeholder="000000" maxlength="6" pattern="[0-9]*" inputmode="numeric" required />
+                    </div>
+
+                    <button id="verify-otp-btn" class="w-full">Verify & Activate</button>
+                    <p id="otp-error" class="text-red-500 text-sm mt-2 h-5"></p>
+                    
+                    <div class="mt-6 text-xs text-gray-400">
+                        <p>Didn't receive a code?</p>
+                        <div class="flex items-center justify-center mt-1">
+                            <button id="resend-otp-btn" class="resend-btn" disabled>
+                                Resend OTP (<span id="countdown">5</span>s)
+                            </button>
+                            <span class="mx-2">or</span>
+                            <button onclick="location.reload()" class="text-blue-600 hover:underline font-medium">
+                                Change Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('verify-otp-btn').addEventListener('click', handleOTPVerification);
+            document.getElementById('resend-otp-btn').addEventListener('click', handleResendOTP);
+        }
+
+        // --- Start Resend Timer ---
+        function startResendTimer() {
+            clearInterval(resendTimer);
+            countdown = 5; // Changed from 60 to 5 seconds
+            const countdownEl = document.getElementById('countdown');
+            const resendBtn = document.getElementById('resend-otp-btn');
+            
+            if (countdownEl) countdownEl.textContent = countdown;
+            if (resendBtn) resendBtn.disabled = true;
+            
+            resendTimer = setInterval(() => {
+                countdown--;
+                if (countdownEl) countdownEl.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(resendTimer);
+                    if (resendBtn) {
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = 'Resend OTP';
+                    }
+                }
+            }, 1000);
+        }
+
+        // --- Handle OTP Verification ---
+        async function handleOTPVerification() {
+            const otpCode = document.getElementById('otp-code').value.trim();
+            const errorEl = document.getElementById('otp-error');
+            const verifyBtn = document.getElementById('verify-otp-btn');
+
+            if (otpCode.length !== 6) {
+                errorEl.textContent = "Please enter a 6-digit code.";
+                return;
+            }
+
+            errorEl.textContent = "";
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = "Verifying...";
+
+            try {
+                const response = await fetch('/api/verify_otp', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email: tempUserEmail, otp: otpCode })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    clearInterval(resendTimer);
+                    authContent.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-check-circle text-green-500 text-6xl mb-4"></i>
+                            <h1 class="text-2xl font-bold mb-2">Verified!</h1>
+                            <p class="text-gray-600 mb-6">Your account is active. You can now sign in.</p>
+                            <a href="/login" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold uppercase text-xs tracking-widest hover:bg-blue-700 transition-colors inline-block">
+                                Sign In Now
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    errorEl.textContent = data.error || "Invalid OTP code.";
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = "Verify & Activate";
+                }
+            } catch (error) {
+                errorEl.textContent = "Server error. Please try again.";
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = "Verify & Activate";
+            }
+        }
+
+        // --- Handle Resend OTP ---
+        async function handleResendOTP() {
+            const errorEl = document.getElementById('otp-error');
+            const resendBtn = document.getElementById('resend-otp-btn');
+            
+            if (!tempUserEmail) {
+                errorEl.textContent = "Email not found. Please restart signup.";
+                return;
+            }
+
+            errorEl.textContent = "";
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = "Sending...";
+
+            try {
+                const response = await fetch('/api/resend_otp', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email: tempUserEmail })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    errorEl.textContent = "";
+                    errorEl.style.color = "green";
+                    errorEl.textContent = "New OTP sent successfully!";
+                    
+                    // Reset the timer
+                    startResendTimer();
+                    
+                    // Clear success message after 3 seconds
+                    setTimeout(() => {
+                        errorEl.textContent = "";
+                        errorEl.style.color = "";
+                    }, 3000);
+                } else {
+                    errorEl.textContent = data.error || "Failed to resend OTP.";
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = "Resend OTP";
+                }
+            } catch (error) {
+                console.error('Resend OTP Error:', error);
+                errorEl.textContent = "Could not connect to server.";
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = "Resend OTP";
+            }
+        }
+    </script>
+</body>
+</html>
