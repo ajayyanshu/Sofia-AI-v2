@@ -23,4 +23,3 @@ python-magic # For Windows
 flask-limiter==3.3.0
 Werkzeug==3.0.1
 user-agents==2.2.0
-python-nmap==0.7.1
