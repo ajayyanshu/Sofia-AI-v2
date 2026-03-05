@@ -6,6 +6,7 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
+
       gtag('config', 'G-NVS8F46X4H');
     </script>
     <meta charset="UTF-8">
@@ -15,6 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <link rel="stylesheet" href="/static/style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
 </head>
@@ -297,14 +299,13 @@
                                 <span class="text-sm font-medium text-gray-700" data-lang="uploadCode">Upload code</span>
                                 <span class="ml-auto text-xs text-gray-500">(multiple)</span>
                             </button>
-                            <!-- NEW: Vulnerability Scan button -->
-                            <button id="vulnerability-scan-btn" class="menu-item w-full text-left" onclick="window.open('index2.html', '_blank')">
-                                <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m0-18c-1.5 0-3 .5-4.5 1.5C5.5 6 4 7 4 9v6c0 2 1.5 3 3.5 4.5C8.5 21 10 22 12 22s3.5-1 4.5-2.5c2-1.5 3.5-2.5 3.5-4.5V9c0-2-1.5-3-3.5-4.5C15 3.5 13.5 3 12 3z" />
+                            <button id="scan-url-btn" class="menu-item w-full text-left">
+                                <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                                 <span class="text-sm font-medium text-gray-700">Vulnerability Scan</span>
                             </button>
-                        </div>
+                            </div>
                     </div>
                     
                     <div class="border-l h-6 border-gray-300 mx-2 self-center"></div>
