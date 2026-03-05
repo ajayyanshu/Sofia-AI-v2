@@ -1191,24 +1191,22 @@ def chat():
 
             scan_results = f"Initiating OWASP ZAP scan on {target_url}...\n"
             try:
-                # Educational Note: Running ZAP requires Java and ~1GB+ RAM. 
-                # This will NOT work on Vercel Serverless functions due to missing Java and Memory constraints.
-                # It requires a dedicated VPS (EC2/Render Docker container).
                 report_file = os.path.join(tempfile.gettempdir(), f"zap_report_{uuid.uuid4().hex}.json")
 
-                # ZAP Command Line Execution using subprocess
+                # ZAP Command Line Execution using Java in Docker
                 zap_cmd = [
-                    "./zap.sh",  # Path to zap.sh. (Or use ["java", "-jar", "zap.jar"])
+                    "java", 
+                    "-jar", "/opt/zap/zap-2.14.0.jar", 
                     "-cmd",
                     "-quickurl", target_url,
                     "-quickprogress",
                     "-quickout", report_file
                 ]
 
-                scan_results += "Executing OWASP ZAP via subprocess (this may take a few minutes)...\n"
+                scan_results += "Executing OWASP ZAP via Java subprocess (this may take a few minutes)...\n"
                 
-                # Execute ZAP. Timeout set to 120s to prevent hanging the web workers.
-                process = subprocess.run(zap_cmd, capture_output=True, text=True, timeout=120)
+                # Execute ZAP. Timeout set to 180s to prevent hanging the web workers.
+                process = subprocess.run(zap_cmd, capture_output=True, text=True, timeout=180)
 
                 if os.path.exists(report_file):
                     with open(report_file, 'r') as f:
@@ -1220,12 +1218,12 @@ def chat():
                         zap_data = zap_data[:30000] + "\n...[Report Truncated]..."
                     scan_results += f"ZAP Scan Completed. Extracted vulnerabilities:\n\n{zap_data}"
                 else:
-                    scan_results += f"ZAP failed to generate a report. Are you running this on Vercel?\n(Vercel does not support Java). Error Output:\n{process.stderr[:500]}\n"
+                    scan_results += f"ZAP failed to generate a report. Error Output:\n{process.stderr[:500]}\n"
 
             except subprocess.TimeoutExpired:
                 scan_results += "ZAP Scan timed out. Full scans require significant time and server resources.\n"
             except FileNotFoundError:
-                scan_results += "OWASP ZAP executable not found. Ensure 'zap.sh' is installed and Java is configured.\n"
+                scan_results += "OWASP ZAP executable or Java not found. Ensure the Dockerfile installed Java and ZAP correctly.\n"
             except Exception as e:
                 scan_results += f"Scanner execution error: {str(e)}\n"
 
