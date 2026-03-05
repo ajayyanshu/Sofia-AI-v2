@@ -12,6 +12,7 @@ const addBtn = document.getElementById('add-btn');
 const addMenu = document.getElementById('add-menu');
 const uploadFileBtn = document.getElementById('upload-file-btn');
 const uploadCodeBtn = document.getElementById('upload-code-btn');
+const scanUrlBtn = document.getElementById('scan-url-btn'); // NEW: Scan URL Button
 const fileInput = document.getElementById('file-input');
 const filePreviewContainer = document.getElementById('file-preview-container');
 const webSearchToggleBtn = document.getElementById('web-search-toggle-btn');
@@ -73,7 +74,6 @@ const usagePlanSection = document.getElementById('usage-plan-section');
 // --- Global State ---
 const markdownConverter = new showdown.Converter();
 
-// CHANGED: Multiple files storage instead of single file
 let filesData = []; // Array of objects {id, data, type, name}
 let currentMode = null; 
 let recognition;
@@ -83,7 +83,7 @@ let chatHistory = [];
 let currentChat = [];
 let currentChatId = null;
 
-// NEW: Track message indices for feedback
+// Track message indices for feedback
 let currentMessageIndex = 0;
 
 // Plan & Usage State
@@ -97,7 +97,7 @@ const usageLimits = {
 };
 let isAdmin = false;
 
-// NEW: Track feedback data
+// Track feedback data
 let feedbackData = new Map(); // Map<messageIndex, {type: 'like'|'dislike', timestamp: Date}>
 
 // --- Sidebar & Temp Chat Logic ---
@@ -136,7 +136,7 @@ newChatBtn.addEventListener('click', () => {
 sendBtn.addEventListener('click', sendMessage);
 messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-// --- FILE UPLOAD LISTENERS ---
+// --- FILE UPLOAD & VULN SCAN LISTENERS ---
 uploadFileBtn.addEventListener('click', () => {
     fileInput.accept = "image/*,.pdf,.doc,.docx";
     fileInput.multiple = true;
@@ -147,6 +147,35 @@ uploadCodeBtn.addEventListener('click', () => {
     fileInput.accept = ".txt,.py,.js,.java,.c,.cpp,.h,.html,.css,.json,.md,.sh,.rb,.go,.php,.swift,.kt";
     fileInput.multiple = true;
     fileInput.click();
+});
+
+// NEW: Vulnerability Scan Button Logic
+scanUrlBtn.addEventListener('click', () => {
+    currentMode = 'vuln_scan';
+    addMenu.classList.add('hidden');
+    messageInput.placeholder = "Enter target URL (e.g., example.com)";
+    messageInput.focus();
+    
+    // Show UI Indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'mode-indicator ml-2 bg-red-100 text-red-800';
+    indicator.innerHTML = `
+        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        <span>Vuln Scan Active</span>
+        <button id="close-scan-mode-btn" class="ml-2 p-1 rounded-full hover:bg-red-200 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    `;
+    modeIndicatorContainer.innerHTML = '';
+    modeIndicatorContainer.appendChild(indicator);
+    
+    document.getElementById('close-scan-mode-btn').addEventListener('click', () => {
+        currentMode = null;
+        modeIndicatorContainer.innerHTML = '';
+        messageInput.placeholder = translations[currentLang]['askAnything'] || "Ask anything";
+    });
 });
 
 fileInput.addEventListener('change', handleFileSelect);
@@ -184,8 +213,6 @@ messageInput.addEventListener('input', () => {
 });
 
 saveToDbBtn.addEventListener('click', saveTemporaryChatToDB);
-
-// Clear all files button event listener
 clearAllFilesBtn.addEventListener('click', clearAllFiles);
 
 // --- Settings Modal Logic ---
@@ -365,7 +392,7 @@ const translations = {
         library: 'লাইব্রেরি', 
         chatHistory: 'চ্যাট ইতিহাস', 
         chatHistoryEmpty: 'আপনার চ্যাট ইতিহাস এখানে প্রদর্শিত হবে।', 
-        logOut: 'লগ আউট', 
+        logOut: 'লॉग আউট', 
         welcome: 'আমি আপনাকে কীভাবে সাহায্য করতে পারি?', 
         addFiles: 'ছবি এবং ফাইল যোগ করুন', 
         askAnything: 'যা খুশি জিজ্ঞাসা করুন', 
@@ -466,8 +493,6 @@ function applyLanguage(lang) {
 
             rows[3].children[0].textContent = translations[lang]['webSearchLimit'];
             rows[3].children[1].textContent = `1 ${translations[lang]['perDay']}`;
-            
-            // The last row (save history) doesn't need translation updates as it's just checkmarks
         }
     }
 
@@ -541,7 +566,6 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', eve
 
 // --- Core Functions ---
 
-// UPDATED: Handle multiple file selection
 function handleFileSelect(event) {
     const selectedFiles = event.target.files;
     if (!selectedFiles || selectedFiles.length === 0) return;
@@ -591,7 +615,6 @@ function handleFileSelect(event) {
     }
 }
 
-// UPDATED: Show file preview with unique ID
 function showFilePreview(file, fileId) {
     const previewItem = document.createElement('div');
     previewItem.className = 'preview-item';
@@ -627,7 +650,6 @@ function showFilePreview(file, fileId) {
     filePreviewContainer.appendChild(previewItem);
 }
 
-// UPDATED: Remove specific file by ID
 window.removeFile = function(fileId) {
     // Remove from filesData array
     const fileIndex = filesData.findIndex(f => f.id === fileId);
@@ -654,7 +676,6 @@ window.removeFile = function(fileId) {
     }
 }
 
-// NEW: Clear all files function
 function clearAllFiles() {
     filesData = [];
     filePreviewContainer.innerHTML = '';
@@ -669,9 +690,7 @@ function clearAllFiles() {
     clearAllFilesBtn.classList.add('hidden');
 }
 
-// NEW: Send feedback to backend
 async function sendFeedback(feedbackType, messageIndex) {
-    // Don't send feedback for temporary chats
     if (!currentChatId || isTemporaryChatActive) {
         console.log('Cannot send feedback for temporary chats');
         return;
@@ -693,7 +712,6 @@ async function sendFeedback(feedbackType, messageIndex) {
         if (result.success) {
             console.log(`Feedback ${feedbackType} saved for message ${messageIndex}`);
             
-            // Store feedback locally
             feedbackData.set(messageIndex, {
                 type: feedbackType,
                 timestamp: new Date()
@@ -706,7 +724,6 @@ async function sendFeedback(feedbackType, messageIndex) {
     }
 }
 
-// NEW: Load feedback for a chat
 async function loadChatFeedback(chatId) {
     if (!chatId) return;
     
@@ -715,10 +732,8 @@ async function loadChatFeedback(chatId) {
         if (response.ok) {
             const data = await response.json();
             if (data.success) {
-                // Clear existing feedback data
                 feedbackData.clear();
                 
-                // Populate feedback data
                 data.feedback.forEach(item => {
                     feedbackData.set(item.message_index, {
                         type: item.feedback_type,
@@ -732,7 +747,6 @@ async function loadChatFeedback(chatId) {
     }
 }
 
-// UPDATED: Send message with multiple files
 async function sendMessage() {
     const text = messageInput.value.trim();
     if (!text && filesData.length === 0) return;
@@ -770,7 +784,6 @@ async function sendMessage() {
     messageInput.value = '';
     messageInput.dispatchEvent(new Event('input'));
 
-    // Upload each file to library
     if (fileInfoArray.length > 0) {
         fileInfoArray.forEach(fileInfo => {
             uploadFileToLibrary(fileInfo);
@@ -778,14 +791,14 @@ async function sendMessage() {
     }
     
     const modeForThisMessage = currentMode;
-    const currentFilesData = [...filesData]; // Copy the array
+    const currentFilesData = [...filesData];
     
-    // Clear files after sending
     clearAllFiles();
     
     if (modeForThisMessage !== 'voice_mode') {
         deactivateWebSearch();
         currentMode = null;
+        messageInput.placeholder = translations[currentLang]['askAnything'] || "Ask anything";
     }
     
     const typingIndicator = addTypingIndicator();
@@ -793,13 +806,12 @@ async function sendMessage() {
     let textToSend = text;
 
     try {
-        // UPDATED: Send array of files to server
         const response = await fetch('/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 text: textToSend, 
-                filesData: currentFilesData, // Send array of files
+                filesData: currentFilesData, 
                 isTemporary: isTemporaryChatActive,
                 mode: modeForThisMessage 
             })
@@ -824,13 +836,12 @@ async function sendMessage() {
         const aiMessage = {
             text: aiResponseText,
             sender: 'ai',
-            messageIndex: currentMessageIndex // Track message index for feedback
+            messageIndex: currentMessageIndex 
         };
         
         const aiMessageElement = addMessage(aiMessage, currentMessageIndex);
         currentChat.push(aiMessage);
         
-        // Increment message index for next message
         currentMessageIndex++;
         
         saveChatSession();
@@ -857,13 +868,11 @@ async function sendMessage() {
     }
 }
 
-// UPDATED: Add message with multiple files display and feedback tracking
 function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex = null) {
     if (sender === 'user') {
         const messageBubble = document.createElement('div');
         let fileHtml = '';
         
-        // Handle multiple files
         if (fileInfo && Array.isArray(fileInfo) && fileInfo.length > 0) {
             fileInfo.forEach(file => {
                 if (file.type.startsWith('image/')) {
@@ -880,12 +889,15 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
         }
         
         let modeHtml = '';
-        if (mode === 'web_search' || mode === 'mic_input' || mode === 'voice_mode') {
+        if (mode === 'web_search' || mode === 'mic_input' || mode === 'voice_mode' || mode === 'vuln_scan') {
             let modeText = 'Google Search';
+            let bgClass = 'bg-green-500';
+            
             if (mode === 'mic_input') modeText = 'Voice Input';
             if (mode === 'voice_mode') modeText = 'Voice Mode';
+            if (mode === 'vuln_scan') { modeText = 'Vulnerability Scan'; bgClass = 'bg-red-500'; }
             
-            modeHtml = `<div class="mt-2 flex items-center gap-1.5"><div class="flex-shrink-0 w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span class="text-xs text-white/80">${modeText}</span></div>`;
+            modeHtml = `<div class="mt-2 flex items-center gap-1.5"><div class="flex-shrink-0 w-5 h-5 rounded-full ${bgClass} text-white flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span class="text-xs text-white/80">${modeText}</span></div>`;
         }
 
         messageBubble.innerHTML = fileHtml + `<div>${text}</div>` + modeHtml;
@@ -903,7 +915,6 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
         
         let contentHtml = markdownConverter.makeHtml(text);
         
-        // Check if feedback exists for this message
         const existingFeedback = feedbackData.get(messageIndex);
         const isLiked = existingFeedback?.type === 'like';
         const isDisliked = existingFeedback?.type === 'dislike';
@@ -931,7 +942,6 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
         aiMessageContainer.appendChild(messageBubble);
         chatContainer.appendChild(aiMessageContainer);
 
-        // Add copy code functionality
         const codeBlocks = messageBubble.querySelectorAll('pre');
         codeBlocks.forEach((pre) => {
             const copyButton = document.createElement('button');
@@ -956,7 +966,6 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
             Prism.highlightAll();
         }
 
-        // Copy button functionality
         messageBubble.querySelector('.copy-btn').addEventListener('click', (e) => {
             const button = e.currentTarget;
             const originalContent = button.innerHTML;
@@ -968,7 +977,6 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
             });
         });
 
-        // UPDATED: Like button with backend integration
         const likeBtn = messageBubble.querySelector('.like-btn');
         likeBtn.addEventListener('click', async (e) => {
             const button = e.currentTarget;
@@ -976,24 +984,17 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
             const isCurrentlyLiked = button.classList.contains('text-blue-600');
             
             if (isCurrentlyLiked) {
-                // Remove like
                 button.classList.remove('text-blue-600');
                 feedbackData.delete(messageIndex);
-                
-                // Send neutral feedback (no feedback)
                 await sendFeedback('neutral', messageIndex);
             } else {
-                // Add like
                 button.classList.add('text-blue-600');
                 messageBubble.querySelector('.dislike-btn').classList.remove('text-red-600');
-                
-                // Send like feedback
                 await sendFeedback('like', messageIndex);
                 feedbackData.set(messageIndex, { type: 'like', timestamp: new Date() });
             }
         });
 
-        // UPDATED: Dislike button with backend integration
         const dislikeBtn = messageBubble.querySelector('.dislike-btn');
         dislikeBtn.addEventListener('click', async (e) => {
             const button = e.currentTarget;
@@ -1001,24 +1002,17 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
             const isCurrentlyDisliked = button.classList.contains('text-red-600');
             
             if (isCurrentlyDisliked) {
-                // Remove dislike
                 button.classList.remove('text-red-600');
                 feedbackData.delete(messageIndex);
-                
-                // Send neutral feedback (no feedback)
                 await sendFeedback('neutral', messageIndex);
             } else {
-                // Add dislike
                 button.classList.add('text-red-600');
                 messageBubble.querySelector('.like-btn').classList.remove('text-blue-600');
-                
-                // Send dislike feedback
                 await sendFeedback('dislike', messageIndex);
                 feedbackData.set(messageIndex, { type: 'dislike', timestamp: new Date() });
             }
         });
 
-        // Speak button functionality
         const speakBtn = messageBubble.querySelector('.speak-btn');
         speakBtn.addEventListener('click', () => {
              if (window.speechSynthesis.speaking) {
@@ -1269,7 +1263,6 @@ endVoiceBtn.addEventListener('click', endVoiceConversation);
 
 // --- Chat History Functions ---
 
-// Function to render skeleton loader in sidebar
 function showChatHistoryLoading() {
     chatHistoryContainer.innerHTML = '';
     for (let i = 0; i < 5; i++) {
@@ -1339,7 +1332,6 @@ async function saveTemporaryChatToDB() {
         currentChatId = savedChat.id; 
         chatHistory.unshift({ id: savedChat.id, title: savedChat.title, messages: [...currentChat] });
         
-        // Load feedback for the newly saved chat
         await loadChatFeedback(currentChatId);
         
         renderChatHistorySidebar();
@@ -1374,7 +1366,6 @@ async function loadChatsFromDB() {
         chatHistoryContainer.innerHTML = `<div class="p-2 text-sm text-red-500">Error loading history.</div>`;
     }
 }
-
 
 function renderChatHistorySidebar() {
     chatHistoryContainer.innerHTML = '';
@@ -1489,7 +1480,6 @@ async function loadChat(chatId) {
     currentChatId = chatId;
     currentChat = [...chat.messages];
 
-    // Reset message index and load feedback for this chat
     currentMessageIndex = 0;
     feedbackData.clear();
     await loadChatFeedback(chatId);
@@ -1499,7 +1489,6 @@ async function loadChat(chatId) {
     chatContainer.classList.remove('hidden');
     document.body.classList.remove('initial-view');
 
-    // Render messages with their feedback states
     currentChat.forEach((message, index) => {
         if (message.sender === 'ai') {
             addMessage(message, index);
@@ -1662,7 +1651,6 @@ async function deleteLibraryFile(fileId) {
 function selectLibraryFile(file) {
     const fileId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
-    // Add to filesData array
     filesData.push({
         id: fileId,
         data: file.fileData,
@@ -1670,7 +1658,6 @@ function selectLibraryFile(file) {
         name: file.fileName
     });
     
-    // Create a mock file object for preview
     const mockFile = {
         name: file.fileName,
         type: file.fileType
@@ -1768,15 +1755,11 @@ async function fetchAndDisplayUserInfo() {
 }
 
 function initializeApp() {
-    // CHANGED: Default theme from 'system' to 'light'
     const savedTheme = localStorage.getItem('theme') || 'light';
     
-    // Update theme button selection
     const initialThemeBtn = document.getElementById(`theme-${savedTheme}`);
     if (initialThemeBtn) {
-        // Remove selected classes from all theme buttons
         themeBtns.forEach(b => b.classList.remove('border-indigo-600', 'border-2', 'ring-2', 'ring-indigo-200'));
-        // Add selected classes to the correct theme button
         initialThemeBtn.classList.add('border-indigo-600', 'border-2', 'ring-2', 'ring-indigo-200');
     }
     
