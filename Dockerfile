@@ -4,13 +4,13 @@ FROM python:3.10-slim
 # 2. Set the working directory inside the container
 WORKDIR /app
 
-# 3. Install Java (required for ZAP) and tools to download/extract files
+# 3. Install Java (required for ZAP) and tools
 RUN apt-get update && \
     apt-get install -y default-jre wget tar && \
     apt-get clean;
 
-# 4. Download and install OWASP ZAP 2.14.0 (Linux native version)
-RUN wget https://github.com/zaproxy/zaproxy/releases/download/v2.14.0/ZAP_2.14.0_Linux.tar.gz && \
+# 4. Download and install OWASP ZAP (Linux version) from the archive, and set permissions
+RUN wget https://github.com/zaproxy/zap-archive/releases/download/v2.14.0/ZAP_2.14.0_Linux.tar.gz && \
     tar -xvf ZAP_2.14.0_Linux.tar.gz && \
     mkdir -p /opt/zap && \
     mv ZAP_2.14.0/* /opt/zap/ && \
