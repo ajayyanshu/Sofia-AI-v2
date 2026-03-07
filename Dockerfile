@@ -5,7 +5,6 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # 3. Install Java (required for newer ZAP versions) and tools
-# Using default-jre ensures we always get the OS's supported Java version
 RUN apt-get update && \
     apt-get install -y default-jre wget tar && \
     apt-get clean;
@@ -16,7 +15,7 @@ RUN wget https://github.com/zaproxy/zaproxy/releases/download/v2.17.0/ZAP_2.17.0
     mkdir -p /opt/zap && \
     mv ZAP_2.17.0/* /opt/zap/ && \
     rm -rf ZAP_2.17.0 ZAP_2.17.0_Linux.tar.gz && \
-    chmod +x /opt/zap/zap.sh
+    chmod -R 777 /opt/zap
 
 # 5. Copy your requirements file and install Python packages
 COPY requirements.txt .
