@@ -9,11 +9,12 @@ RUN apt-get update && \
     apt-get install -y default-jre wget unzip && \
     apt-get clean;
 
-# 4. Download and install OWASP ZAP 2.14.0
+# 4. Download and install OWASP ZAP 2.14.0, and grant execution permissions
 RUN wget https://github.com/zaproxy/zaproxy/releases/download/v2.14.0/ZAP_2.14.0_Crossplatform.zip && \
     unzip ZAP_2.14.0_Crossplatform.zip && \
     mv ZAP_2.14.0 /opt/zap && \
-    rm ZAP_2.14.0_Crossplatform.zip
+    rm ZAP_2.14.0_Crossplatform.zip && \
+    chmod +x /opt/zap/zap.sh
 
 # 5. Copy your requirements file and install Python packages
 COPY requirements.txt .
