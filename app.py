@@ -4,6 +4,8 @@ import os
 import re
 import sys
 import json
+import subprocess
+from urllib.parse import urlparse
 from datetime import datetime, date, timedelta
 import uuid
 import random
@@ -1380,6 +1382,72 @@ def chat():
         web_search_context = None
         library_search_context = None
         
+        # --- ZAP Vulnerability Scan Execution via Subprocess ---
+        if request_mode == 'vuln_scan':
+            target_url = user_message.strip()
+            
+            # Basic URL validation
+            if not target_url.startswith(('http://', 'https://')):
+                target_url = 'https://' + target_url
+                
+            parsed_url = urlparse(target_url)
+            if not parsed_url.netloc:
+                return jsonify({'response': "Invalid URL provided. Please provide a valid target like 'example.com' or 'https://example.com'."})
+
+            print(f"🔍 Starting ZAP Quick Scan for {target_url}...")
+            
+            # Temporary path for the JSON report
+            report_path = "/tmp/zap_report.json"
+            
+            # Construct the ZAP headless command
+            zap_command = [
+                "/opt/zap/zap.sh", 
+                "-cmd", 
+                "-quickurl", target_url, 
+                "-quickout", report_path,
+                "-quickprogress"
+            ]
+
+            try:
+                # Run ZAP via command line (this may take a few minutes)
+                process = subprocess.run(
+                    zap_command, 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    timeout=300 # 5-minute timeout
+                )
+                
+                # Check if the report was generated
+                if os.path.exists(report_path):
+                    with open(report_path, 'r') as f:
+                        report_data = json.load(f)
+                    
+                    # Summarize the report for the user
+                    alerts = report_data.get('site', [])[0].get('alerts', []) if report_data.get('site') else []
+                    
+                    if not alerts:
+                        ai_response = f"✅ **ZAP Scan Complete!** No obvious vulnerabilities were found for `{target_url}`."
+                    else:
+                        ai_response = f"⚠️ **ZAP Scan Complete for `{target_url}`!**\n\nFound the following vulnerabilities:\n"
+                        for alert in alerts:
+                            riskdesc = alert.get('riskdesc', 'Unknown Risk')
+                            name = alert.get('name', 'Unknown Vulnerability')
+                            ai_response += f"- **{name}** ({riskdesc})\n"
+                            
+                    os.remove(report_path) # Clean up
+                    
+                else:
+                    ai_response = f"❌ **Scan Failed:** ZAP did not generate a report.\n\nError Output: {process.stderr[-500:]}"
+                    
+                return jsonify({'response': ai_response})
+
+            except subprocess.TimeoutExpired:
+                return jsonify({'response': f"⏱️ **Scan Timeout:** The vulnerability scan for `{target_url}` took too long and was aborted."})
+            except Exception as e:
+                print(f"ZAP Execution Error: {e}")
+                return jsonify({'response': f"❌ **Error running ZAP:** {str(e)}"})
+                
         # Sofia AI Identity - Strongly enforced
         SOFIA_IDENTITY = "Sofia AI"
         FULL_IDENTITY = """I am Sofia AI, a Security-Focused Multimodal Assistant. 
