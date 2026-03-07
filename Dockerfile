@@ -4,9 +4,10 @@ FROM python:3.10-slim
 # 2. Set the working directory inside the container
 WORKDIR /app
 
-# 3. Install Java 17 (required for newer ZAP versions) and tools
+# 3. Install Java (required for newer ZAP versions) and tools
+# Using default-jre ensures we always get the OS's supported Java version
 RUN apt-get update && \
-    apt-get install -y openjdk-17-jre-headless wget tar && \
+    apt-get install -y default-jre wget tar && \
     apt-get clean;
 
 # 4. Download and install OWASP ZAP v2.17.0 (Latest Linux version)
