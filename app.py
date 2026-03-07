@@ -1723,7 +1723,8 @@ def chat():
                     if library_search_context: 
                         context_parts.append(f"--- YOUR LIBRARY RESULTS ---\n{library_search_context}")
                     
-                    full_context = f"{SYSTEM_PROMPT}\n\n{'\n\n'.join(context_parts)}\n\n--- USER QUESTION ---\n{combined_text}"
+                    context_joined = '\n\n'.join(context_parts)
+                    full_context = f"{SYSTEM_PROMPT}\n\n{context_joined}\n\n--- USER QUESTION ---\n{combined_text}"
                     gemini_model = genai.GenerativeModel("gemini-2.5-flash-lite")
                     response = gemini_model.generate_content(full_context)
                     gemini_response = response.text
@@ -1848,7 +1849,8 @@ def chat():
                     if library_search_context: context_parts.append(f"--- YOUR LIBRARY RESULTS ---\n{library_search_context}")
                     
                     groq_history = [{"role": "system", "content": SYSTEM_PROMPT_GROQ}]
-                    groq_history.append({"role": "user", "content": f"{'\n\n'.join(context_parts)}\n\n--- USER QUESTION ---\n{combined_text}"})
+                    context_joined = '\n\n'.join(context_parts)
+                    groq_history.append({"role": "user", "content": f"{context_joined}\n\n--- USER QUESTION ---\n{combined_text}"})
                     
                     groq_response = call_api(
                         "https://api.groq.com/openai/v1/chat/completions", 
