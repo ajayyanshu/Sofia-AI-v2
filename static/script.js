@@ -12,7 +12,7 @@ const addBtn = document.getElementById('add-btn');
 const addMenu = document.getElementById('add-menu');
 const uploadFileBtn = document.getElementById('upload-file-btn');
 const uploadCodeBtn = document.getElementById('upload-code-btn');
-const scanUrlBtn = document.getElementById('scan-url-btn'); 
+const scanUrlBtn = document.getElementById('scan-url-btn'); // NEW: Scan URL Button
 const fileInput = document.getElementById('file-input');
 const filePreviewContainer = document.getElementById('file-preview-container');
 const webSearchToggleBtn = document.getElementById('web-search-toggle-btn');
@@ -32,12 +32,6 @@ const searchHistoryInput = document.getElementById('search-history-input');
 const tempChatBanner = document.getElementById('temp-chat-banner');
 const saveToDbBtn = document.getElementById('save-to-db-btn');
 const clearAllFilesBtn = document.getElementById('clear-all-files-btn');
-
-// NEW: Vulnerability Scan Modal Selectors
-const vulnModal = document.getElementById('vuln-modal');
-const closeVulnModalBtn = document.getElementById('close-vuln-modal');
-const vulnImportBtn = document.getElementById('vuln-import-btn');
-const vulnTargetInput = document.getElementById('vuln-target-input');
 
 // Contact Us Elements
 const contactMenuItem = document.getElementById('contact-menu-item');
@@ -155,80 +149,33 @@ uploadCodeBtn.addEventListener('click', () => {
     fileInput.click();
 });
 
-// NEW: Vulnerability Scan Button Logic (Open Modal)
+// NEW: Vulnerability Scan Button Logic
 scanUrlBtn.addEventListener('click', () => {
-    addMenu.classList.add('hidden');
-    vulnModal.classList.remove('hidden');
-    vulnModal.classList.add('flex');
-    vulnTargetInput.focus();
-});
-
-// Close the modal
-closeVulnModalBtn.addEventListener('click', () => {
-    vulnModal.classList.add('hidden');
-    vulnModal.classList.remove('flex');
-    vulnTargetInput.value = '';
-});
-
-// Handle the Import button click
-vulnImportBtn.addEventListener('click', () => {
-    const targetUrl = vulnTargetInput.value.trim();
-    if (!targetUrl) return;
-
     currentMode = 'vuln_scan';
-
-    // Create a visual chip in the file preview container (like the Gemini image)
-    const chipId = 'vuln_' + Date.now();
-    const previewItem = document.createElement('div');
-    previewItem.className = 'preview-item doc-preview bg-gray-100 dark:bg-gray-800 rounded-xl p-2 flex items-center gap-3 w-auto max-w-xs border border-gray-200 dark:border-gray-700';
-    previewItem.dataset.fileId = chipId;
-
-    // Add GitHub icon and text to the chip
-    previewItem.innerHTML = `
-        <svg class="h-5 w-5 text-gray-800 dark:text-gray-200" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        <div class="flex flex-col overflow-hidden">
-            <span class="text-xs text-gray-800 dark:text-gray-200 truncate font-medium">${targetUrl.split('/').pop() || targetUrl}</span>
-            <span class="text-[10px] text-gray-500">GitHub</span>
-        </div>
-        <button class="remove-preview-btn ml-2 bg-transparent text-gray-500 hover:text-red-500 hover:bg-transparent static w-auto h-auto" data-fileid="${chipId}">&times;</button>
-    `;
-
-    // Handle chip removal
-    const removeBtn = previewItem.querySelector('.remove-preview-btn');
-    removeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        previewItem.remove();
-        currentMode = null;
-        
-        // Hide send/clear buttons if everything is empty
-        if (filePreviewContainer.children.length === 0 && messageInput.value.trim() === '') {
-            sendBtn.classList.add('hidden');
-            micBtn.classList.remove('hidden');
-            voiceModeBtn.classList.remove('hidden');
-        }
-        if (filePreviewContainer.children.length === 0) {
-            clearAllFilesBtn.classList.add('hidden');
-        }
-    });
-
-    // Add the chip to the preview UI
-    filePreviewContainer.appendChild(previewItem);
-    clearAllFilesBtn.classList.remove('hidden');
-    sendBtn.classList.remove('hidden');
-    micBtn.classList.add('hidden');
-    voiceModeBtn.classList.add('hidden');
-
-    // Pre-fill the input box with a prompt context
-    messageInput.value = `Scan this repository for vulnerabilities: ${targetUrl} \n` + messageInput.value;
-    
-    // Resize input and set focus
-    messageInput.dispatchEvent(new Event('input'));
+    addMenu.classList.add('hidden');
+    messageInput.placeholder = "Enter target URL (e.g., example.com)";
     messageInput.focus();
-
-    // Hide the modal and clear the input
-    vulnModal.classList.add('hidden');
-    vulnModal.classList.remove('flex');
-    vulnTargetInput.value = '';
+    
+    // Show UI Indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'mode-indicator ml-2 bg-red-100 text-red-800';
+    indicator.innerHTML = `
+        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        <span>Vuln Scan Active</span>
+        <button id="close-scan-mode-btn" class="ml-2 p-1 rounded-full hover:bg-red-200 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    `;
+    modeIndicatorContainer.innerHTML = '';
+    modeIndicatorContainer.appendChild(indicator);
+    
+    document.getElementById('close-scan-mode-btn').addEventListener('click', () => {
+        currentMode = null;
+        modeIndicatorContainer.innerHTML = '';
+        messageInput.placeholder = translations[currentLang]['askAnything'] || "Ask anything";
+    });
 });
 
 fileInput.addEventListener('change', handleFileSelect);
@@ -257,14 +204,12 @@ messageInput.addEventListener('input', () => {
     let newHeight = messageInput.scrollHeight;
     messageInput.style.height = `${newHeight}px`;
     
-    // Also consider vuln_scan chips when toggling the send button
-    const hasChips = filePreviewContainer.children.length > 0;
     const hasText = messageInput.value.trim() !== '';
-    const shouldShowSend = hasText || filesData.length > 0 || hasChips;
+    const shouldShowSend = hasText || filesData.length > 0;
     
     sendBtn.classList.toggle('hidden', !shouldShowSend);
-    micBtn.classList.toggle('hidden', hasText || hasChips);
-    voiceModeBtn.classList.toggle('hidden', hasText || hasChips);
+    micBtn.classList.toggle('hidden', hasText);
+    voiceModeBtn.classList.toggle('hidden', hasText);
 });
 
 saveToDbBtn.addEventListener('click', saveTemporaryChatToDB);
@@ -719,7 +664,7 @@ window.removeFile = function(fileId) {
     }
     
     // Check if all files are removed
-    if (filesData.length === 0 && messageInput.value.trim() === '' && filePreviewContainer.children.length === 0) {
+    if (filesData.length === 0 && messageInput.value.trim() === '') {
         sendBtn.classList.add('hidden');
         micBtn.classList.remove('hidden');
         voiceModeBtn.classList.remove('hidden');
@@ -727,7 +672,7 @@ window.removeFile = function(fileId) {
         clearAllFilesBtn.classList.add('hidden');
     } else {
         // Update clear all button visibility
-        clearAllFilesBtn.classList.toggle('hidden', filesData.length === 0 && filePreviewContainer.children.length === 0);
+        clearAllFilesBtn.classList.toggle('hidden', filesData.length === 0);
     }
 }
 
@@ -804,7 +749,7 @@ async function loadChatFeedback(chatId) {
 
 async function sendMessage() {
     const text = messageInput.value.trim();
-    if (!text && filesData.length === 0 && filePreviewContainer.children.length === 0) return;
+    if (!text && filesData.length === 0) return;
     
     if (!isAdmin && usageCounts.messages >= usageLimits.messages) {
         alert("You've reached your monthly message limit.");
