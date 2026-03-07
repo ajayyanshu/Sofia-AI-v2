@@ -1,5 +1,5 @@
-# 1. Use an official lightweight Python image
-FROM python:3.10-slim
+# 1. Upgrade to Python 3.12 to fix the Google API Core warning
+FROM python:3.12-slim
 
 # 2. Set the working directory inside the container
 WORKDIR /app
@@ -21,11 +21,14 @@ RUN wget https://github.com/zaproxy/zaproxy/releases/download/v2.17.0/ZAP_2.17.0
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 6. Copy all your project files into the container
+# 6. Install Gunicorn to fix the "Development Server" warning
+RUN pip install --no-cache-dir gunicorn
+
+# 7. Copy all your project files into the container
 COPY . .
 
-# 7. Expose the port Flask uses
+# 8. Expose the port Flask uses
 EXPOSE 5000
 
-# 8. Start the Flask application
-CMD ["python", "app.py"]
+# 9. Start the app using Gunicorn (Production Server) instead of python app.py
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "300", "app:app"]
