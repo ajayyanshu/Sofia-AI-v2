@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sofia AI | Under Construction</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        theme: {
+                            bg: '#e6ebff',      // Soft periwinkle background
+                            primary: '#2b3481', // Deep navy blue
+                            accent: '#ffcc00',  // Construction yellow
+                            soft: '#7b85d4',    // Muted purple/blue for shapes
+                            textBody: '#949bb5' // Light gray/blue for text
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #e6ebff;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(123, 133, 212, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(123, 133, 212, 0.15) 0%, transparent 30%);
+        }
+
+        /* Subtle swoosh line in background */
+        .bg-line {
+            position: absolute;
+            border: 1px solid rgba(123, 133, 212, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans text-theme-primary flex items-center justify-center p-4 sm:p-8 lg:p-16 relative">
+
+    <!-- Decorative Background Elements Wrapped to Prevent Scrolling -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="bg-line w-[80vw] h-[80vw] top-[-30vw] left-[-20vw]"></div>
+        <div class="bg-line w-[100vw] h-[100vw] bottom-[-50vw] right-[-20vw]"></div>
+    </div>
+
+    <!-- Main White Card Container (Reduced pb for tighter bottom space) -->
+    <main class="bg-white w-full max-w-7xl rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl relative z-10 pt-6 px-6 pb-4 sm:pt-8 sm:px-8 sm:pb-6 md:p-12 lg:pt-16 lg:px-16 lg:pb-10 overflow-hidden">
+        
+        <!-- Header -->
+        <header class="flex justify-center lg:justify-start items-center mb-8 lg:mb-12">
+            <!-- Logo -->
+            <div class="flex items-center gap-2 sm:gap-3 text-theme-primary font-extrabold tracking-wide text-lg sm:text-xl">
+                <div class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-theme-primary"></div>
+                SOFIA AI <span class="font-medium text-theme-soft">ASSISTANT</span>
+            </div>
+        </header>
+
+        <!-- Two Column Layout -->
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-8">
+            
+            <!-- Left Column: Text Content -->
+            <div class="flex-1 space-y-3 sm:space-y-4 max-w-xl text-center lg:text-left">
+                <h1 class="text-5xl sm:text-6xl lg:text-[5.5rem] font-extrabold text-theme-primary tracking-tight leading-none mb-2 sm:mb-4">
+                    Oops!
+                </h1>
+                <h2 class="text-xl sm:text-2xl lg:text-4xl font-bold text-theme-primary mb-4 sm:mb-6">
+                    Under construction
+                </h2>
+                <p class="text-theme-textBody text-sm sm:text-base lg:text-lg leading-relaxed max-w-md mx-auto lg:mx-0 mb-8 sm:mb-10">
+                    We are working hard behind the scenes configuring Sofia AI's architecture. Please check back soon as we finalize the system.
+                </p>
+                <div class="pt-2 sm:pt-4">
+                    <button class="bg-theme-primary text-white text-sm sm:text-base font-semibold tracking-wide py-3 sm:py-4 px-8 sm:px-10 rounded-full hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+                        MORE INFO
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Vector Illustration -->
+            <div class="flex-1 w-full max-w-xl relative flex justify-center mt-6 lg:mt-0">
+                
+                <!-- Custom Inline SVG mimicking the construction illustration (Adjusted viewBox to crop bottom empty space) -->
+                <svg viewBox="0 0 500 380" class="w-full h-auto max-w-[400px] lg:max-w-none" xmlns="http://www.w3.org/2000/svg">
+                    
+                    <!-- Soft Background Blob/Tree shape -->
+                    <path d="M 40 320 Q 40 270 70 270 Q 100 270 100 320 Z" fill="#7b85d4" opacity="0.8"/>
+                    <rect x="65" y="320" width="10" height="40" fill="#2b3481" />
+                    
+                    <path d="M 50 150 Q 150 50 350 100 Q 450 150 450 250 Q 450 350 250 350 Q 50 350 50 150 Z" fill="#f2f4ff" />
+
+                    <!-- Crane Base and Tower -->
+                    <rect x="380" y="80" width="20" height="280" fill="#2b3481" />
+                    <rect x="360" y="360" width="60" height="10" fill="#2b3481" />
+                    <path d="M 380 80 L 380 40 L 400 40 L 400 80 Z" fill="#2b3481" />
+                    <!-- Crane Arm -->
+                    <rect x="220" y="60" width="200" height="15" fill="#2b3481" />
+                    <path d="M 400 60 L 440 60 L 440 75 L 400 75 Z" fill="#2b3481" />
+                    
+                    <!-- Crane Cable -->
+                    <line x1="240" y1="75" x2="240" y2="150" stroke="#2b3481" stroke-width="3" />
+                    
+                    <!-- Dangling Warning Sign -->
+                    <g transform="translate(195, 130)">
+                        <polygon points="45,0 90,45 45,90 0,45" fill="#ffcc00" stroke="#2b3481" stroke-width="4" stroke-linejoin="round"/>
+                        <circle cx="45" cy="5" r="4" fill="#2b3481" />
+                        <line x1="45" y1="5" x2="45" y2="-10" stroke="#2b3481" stroke-width="3" />
+                        <!-- Exclamation Mark -->
+                        <path d="M 40 25 L 50 25 L 48 60 L 42 60 Z" fill="#2b3481" />
+                        <circle cx="45" cy="72" r="5" fill="#2b3481" />
+                    </g>
+
+                    <!-- Large Laptop Base -->
+                    <rect x="120" y="180" width="240" height="160" rx="12" fill="#7b85d4" stroke="#2b3481" stroke-width="4" />
+                    <!-- Laptop Screen -->
+                    <rect x="130" y="190" width="220" height="140" fill="#2b3481" />
+                    <!-- Laptop Bottom Keyboard section -->
+                    <path d="M 100 340 L 380 340 Q 390 340 390 350 L 390 360 Q 390 370 380 370 L 100 370 Q 90 370 90 360 L 90 350 Q 90 340 100 340 Z" fill="#7b85d4" stroke="#2b3481" stroke-width="4"/>
+                    <!-- Trackpad -->
+                    <rect x="210" y="350" width="60" height="8" rx="2" fill="#2b3481" />
+
+                    <!-- Striped Caution Tape crossing the laptop -->
+                    <g transform="translate(110, 260)">
+                        <rect x="-10" y="0" width="280" height="30" fill="#ffcc00" />
+                        <!-- Striped pattern -->
+                        <g fill="#2b3481" opacity="0.9">
+                            <polygon points="-10,0 5,0 -10,15" />
+                            <polygon points="15,0 40,0 15,30 -10,30" />
+                            <polygon points="50,0 75,0 50,30 25,30" />
+                            <polygon points="85,0 110,0 85,30 60,30" />
+                            <polygon points="120,0 145,0 120,30 95,30" />
+                            <polygon points="155,0 180,0 155,30 130,30" />
+                            <polygon points="190,0 215,0 190,30 165,30" />
+                            <polygon points="225,0 250,0 225,30 200,30" />
+                            <polygon points="260,0 285,0 260,30 235,30" />
+                        </g>
+                    </g>
+
+                    <!-- Construction Cones -->
+                    <!-- Cone 1 (Left) -->
+                    <g transform="translate(130, 310)">
+                        <polygon points="15,0 30,50 0,50" fill="#ffcc00" />
+                        <polygon points="11,15 19,15 22,25 8,25" fill="#ffffff" />
+                        <rect x="-5" y="50" width="40" height="6" fill="#ffcc00" />
+                    </g>
+                    <!-- Cone 2 (Right) -->
+                    <g transform="translate(320, 310)">
+                        <polygon points="15,0 30,50 0,50" fill="#ffcc00" />
+                        <polygon points="11,15 19,15 22,25 8,25" fill="#ffffff" />
+                        <rect x="-5" y="50" width="40" height="6" fill="#ffcc00" />
+                    </g>
+
+                    <!-- Character (Sitting on left edge of laptop screen) -->
+                    <g transform="translate(125, 145)">
+                        <!-- Torso -->
+                        <rect x="0" y="20" width="18" height="25" fill="#ffffff" stroke="#2b3481" stroke-width="2"/>
+                        <!-- Head -->
+                        <circle cx="9" cy="8" r="8" fill="#ffcdb2" stroke="#2b3481" stroke-width="2"/>
+                        <!-- Hard Hat -->
+                        <path d="M 1 8 Q 9 -2 17 8 L 22 8 L -4 8 Z" fill="#ffcc00" stroke="#2b3481" stroke-width="2"/>
+                        <!-- Legs dangling -->
+                        <path d="M -5 45 L -20 60" stroke="#2b3481" stroke-width="6" stroke-linecap="round"/>
+                        <path d="M 5 45 L -10 65" stroke="#2b3481" stroke-width="6" stroke-linecap="round"/>
+                        <!-- Tiny laptop in lap -->
+                        <rect x="-22" y="30" width="20" height="12" fill="#2b3481" rx="2" />
+                    </g>
+
+                </svg>
+            </div>
+            
+        </div>
+    </main>
+
+</body>
+</html>
