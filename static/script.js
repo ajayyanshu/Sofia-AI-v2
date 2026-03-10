@@ -38,8 +38,8 @@ const clearAllFilesBtn = document.getElementById('clear-all-files-btn');
 const stopBtn = document.createElement('button');
 stopBtn.id = 'stop-btn';
 stopBtn.title = 'Stop generating';
-// Vibrant Red color scheme
-stopBtn.className = 'hidden p-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors focus:outline-none flex items-center justify-center shadow-sm';
+// Inverted colors: White background, Red icon
+stopBtn.className = 'hidden p-2 rounded-full bg-white text-red-600 border border-red-600 hover:bg-red-50 dark:bg-gray-800 dark:border-red-500 dark:text-red-500 dark:hover:bg-gray-700 transition-colors focus:outline-none flex items-center justify-center shadow-sm';
 stopBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1" ry="1"></rect></svg>`;
 
 // Insert the stop button right after the send button in the DOM
