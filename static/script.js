@@ -83,7 +83,7 @@ let chatHistory = [];
 let currentChat = [];
 let currentChatId = null;
 
-// ADDED: AbortController to handle stopping message generation
+// AbortController to handle stopping message generation
 let currentAbortController = null;
 
 // Track message indices for feedback
@@ -152,7 +152,7 @@ uploadCodeBtn.addEventListener('click', () => {
     fileInput.click();
 });
 
-// NEW: Vulnerability Scan Button Logic
+// Vulnerability Scan Button Logic
 scanUrlBtn.addEventListener('click', () => {
     currentMode = 'vuln_scan';
     addMenu.classList.add('hidden');
@@ -378,7 +378,7 @@ const translations = {
         used: 'उपयोग किया गया',
         contactUs: 'हमसे संपर्क करें',
         email: 'ईमेल',
-        telegram: 'टेलीগ্রাম',
+        telegram: 'टेलीग्राम',
         contactMessage: 'हमें आपसे जानकर खुशी होगी!'
     },
     'bn': { 
@@ -785,7 +785,7 @@ async function sendMessage() {
     currentChat.push(userMessage);
 
     messageInput.value = '';
-    messageInput.dispatchEvent(new Event('input'));
+    messageInput.dispatchEvent(new Event('input')); // This triggers the input listener which toggles mic/send buttons.
 
     if (fileInfoArray.length > 0) {
         fileInfoArray.forEach(fileInfo => {
@@ -806,6 +806,13 @@ async function sendMessage() {
     
     // --- THIS ADDS THE BLUE CIRCLE ANIMATION (Processing State) ---
     const typingIndicator = addTypingIndicator();
+
+    // --- TEMPORARILY HIDE INPUT BUTTONS DURING GENERATION ---
+    micBtn.classList.add('hidden');
+    voiceModeBtn.classList.add('hidden');
+    webSearchToggleBtn.classList.add('hidden');
+    addBtn.classList.add('hidden');
+    sendBtn.classList.add('hidden');
 
     let textToSend = text;
     
@@ -892,6 +899,14 @@ async function sendMessage() {
     } finally {
         // 4. Clean up the controller
         currentAbortController = null;
+
+        // --- RESTORE INPUT BUTTONS AFTER GENERATION ---
+        const hasText = messageInput.value.trim() !== '';
+        micBtn.classList.toggle('hidden', hasText);
+        voiceModeBtn.classList.toggle('hidden', hasText);
+        webSearchToggleBtn.classList.remove('hidden');
+        addBtn.classList.remove('hidden');
+        sendBtn.classList.toggle('hidden', !hasText && filesData.length === 0);
     }
 }
 
