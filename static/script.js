@@ -33,6 +33,20 @@ const tempChatBanner = document.getElementById('temp-chat-banner');
 const saveToDbBtn = document.getElementById('save-to-db-btn');
 const clearAllFilesBtn = document.getElementById('clear-all-files-btn');
 
+// --- STOP BUTTON UI SETUP ---
+// Create the stop button dynamically to match the image format and append it next to the send button
+const stopBtn = document.createElement('button');
+stopBtn.id = 'stop-btn';
+stopBtn.title = 'Stop generating';
+// Style matches a circular dark button with a square inside
+stopBtn.className = 'hidden p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-300 transition-colors focus:outline-none flex items-center justify-center';
+stopBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1" ry="1"></rect></svg>`;
+
+// Insert the stop button right after the send button in the DOM
+if (sendBtn && sendBtn.parentNode) {
+    sendBtn.parentNode.insertBefore(stopBtn, sendBtn.nextSibling);
+}
+
 // Contact Us Elements
 const contactMenuItem = document.getElementById('contact-menu-item');
 const contactModal = document.getElementById('contact-modal');
@@ -139,6 +153,13 @@ newChatBtn.addEventListener('click', () => {
 sendBtn.addEventListener('click', sendMessage);
 messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
+// Abort generating message on click
+stopBtn.addEventListener('click', () => {
+    if (currentAbortController) {
+        currentAbortController.abort(); // Triggers the AbortError
+    }
+});
+
 // --- FILE UPLOAD & VULN SCAN LISTENERS ---
 uploadFileBtn.addEventListener('click', () => {
     fileInput.accept = "image/*,.pdf,.doc,.docx";
@@ -210,9 +231,12 @@ messageInput.addEventListener('input', () => {
     const hasText = messageInput.value.trim() !== '';
     const shouldShowSend = hasText || filesData.length > 0;
     
-    sendBtn.classList.toggle('hidden', !shouldShowSend);
-    micBtn.classList.toggle('hidden', hasText);
-    voiceModeBtn.classList.toggle('hidden', hasText);
+    // Only toggle if stop button is not currently active
+    if (stopBtn.classList.contains('hidden')) {
+        sendBtn.classList.toggle('hidden', !shouldShowSend);
+        micBtn.classList.toggle('hidden', hasText);
+        voiceModeBtn.classList.toggle('hidden', hasText);
+    }
 });
 
 saveToDbBtn.addEventListener('click', saveTemporaryChatToDB);
@@ -785,7 +809,7 @@ async function sendMessage() {
     currentChat.push(userMessage);
 
     messageInput.value = '';
-    messageInput.dispatchEvent(new Event('input')); // This triggers the input listener which toggles mic/send buttons.
+    messageInput.dispatchEvent(new Event('input')); // Reset auto-resize
 
     if (fileInfoArray.length > 0) {
         fileInfoArray.forEach(fileInfo => {
@@ -813,6 +837,9 @@ async function sendMessage() {
     webSearchToggleBtn.classList.add('hidden');
     addBtn.classList.add('hidden');
     sendBtn.classList.add('hidden');
+    
+    // --- SHOW THE NEW SQUARE-IN-CIRCLE STOP BUTTON ---
+    stopBtn.classList.remove('hidden');
 
     let textToSend = text;
     
@@ -829,7 +856,7 @@ async function sendMessage() {
                 isTemporary: isTemporaryChatActive,
                 mode: modeForThisMessage 
             }),
-            signal: currentAbortController.signal // 2. Attach the abort signal here
+            signal: currentAbortController.signal // Attach the abort signal here
         });
         
         // --- THIS REMOVES THE BLUE CIRCLE ANIMATION ONCE FINISHED ---
@@ -870,7 +897,7 @@ async function sendMessage() {
     } catch (error) {
         typingIndicator.remove(); // Also remove loader on error
         
-        // 3. Handle the Abort Action
+        // Handle the Abort Action
         if (error.name === 'AbortError') {
             console.log("Generation stopped by user.");
             const stoppedMessage = {
@@ -897,16 +924,20 @@ async function sendMessage() {
             speakText(errorMessageText, startListening);
         }
     } finally {
-        // 4. Clean up the controller
+        // Clean up the controller
         currentAbortController = null;
 
-        // --- RESTORE INPUT BUTTONS AFTER GENERATION ---
+        // --- HIDE STOP BUTTON AND RESTORE INPUT BUTTONS AFTER GENERATION ---
+        stopBtn.classList.add('hidden');
+        
         const hasText = messageInput.value.trim() !== '';
+        const shouldShowSend = hasText || filesData.length > 0;
+        
         micBtn.classList.toggle('hidden', hasText);
         voiceModeBtn.classList.toggle('hidden', hasText);
         webSearchToggleBtn.classList.remove('hidden');
         addBtn.classList.remove('hidden');
-        sendBtn.classList.toggle('hidden', !hasText && filesData.length === 0);
+        sendBtn.classList.toggle('hidden', !shouldShowSend);
     }
 }
 
@@ -1121,38 +1152,20 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
 }
 
 // --- THIS ADDS THE TYPING / THINKING BLUE CIRCLE ---
+// (Reverted to its original state so the stop button doesn't show up here too)
 function addTypingIndicator() {
     const typingIndicatorContainer = document.createElement('div');
-    typingIndicatorContainer.className = 'ai-message-container typing-indicator items-center flex justify-between w-full pr-4';
-    
+    typingIndicatorContainer.className = 'ai-message-container typing-indicator items-center';
     const animatedAvatarHTML = `
-        <div class="flex items-center">
-            <div class="ai-avatar-animated">
-                <div class="orbiting-circle"></div>
-                <span class="globe text-2xl">🌎</span>
-            </div>
-            <span class="text-gray-600 font-medium ml-2">Just a sec...</span>
+        <div class="ai-avatar-animated">
+            <div class="orbiting-circle"></div>
+            <span class="globe text-2xl">🌎</span>
         </div>
-        <button id="stop-generation-btn" class="ml-4 px-3 py-1 bg-red-100 text-red-600 border border-red-200 rounded-lg hover:bg-red-200 text-sm font-medium transition-colors flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" /></svg>
-            Stop
-        </button>
+        <span class="text-gray-600 font-medium ml-2">Just a sec...</span>
     `;
-    
     typingIndicatorContainer.innerHTML = animatedAvatarHTML;
     chatContainer.appendChild(typingIndicatorContainer);
     chatContainer.scrollTop = chatContainer.scrollHeight;
-
-    // Add event listener to cancel the request when clicked
-    const stopBtn = document.getElementById('stop-generation-btn');
-    if (stopBtn) {
-        stopBtn.addEventListener('click', () => {
-            if (currentAbortController) {
-                currentAbortController.abort(); // Triggers the AbortError
-            }
-        });
-    }
-
     return typingIndicatorContainer;
 }
 
