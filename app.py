@@ -1,4 +1,6 @@
-import base64  
+import base64
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning) # Hides Google SDK deprecation warnings
 import io
 import os
 import re
@@ -463,6 +465,10 @@ def signup_page():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     return render_template('signup.html')
+
+@app.route('/website.html', methods=['GET'])
+def website_page():
+    return render_template('website.html')
 
 @app.route('/login')
 def login_redirect():
@@ -1399,6 +1405,12 @@ def chat():
             # Temporary path for the JSON report
             report_path = "/tmp/zap_report.json"
             
+            # --- FIX 1: Restrict ZAP Memory ---
+            # Force the Java Virtual Machine to use a maximum of 300MB of RAM
+            # This prevents the Render container (512MB total) from running out of memory and crashing
+            custom_env = os.environ.copy()
+            custom_env["JAVA_OPTS"] = "-Xmx300m"
+            
             # Construct the ZAP headless command
             zap_command = [
                 "/opt/zap/zap.sh", 
@@ -1409,13 +1421,16 @@ def chat():
             ]
 
             try:
+                # --- FIX 2: Lower the Timeout ---
                 # Run ZAP via command line (this may take a few minutes)
+                # Render cuts HTTP requests at 100 seconds. Limit this to 90 seconds.
                 process = subprocess.run(
                     zap_command, 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.PIPE,
                     text=True,
-                    timeout=300 # 5-minute timeout
+                    timeout=90, 
+                    env=custom_env
                 )
                 
                 # Check if the report was generated
@@ -1427,7 +1442,7 @@ def chat():
                     alerts = report_data.get('site', [])[0].get('alerts', []) if report_data.get('site') else []
                     
                     if not alerts:
-                        ai_response = f"✅ **ZAP Scan Complete!** No obvious vulnerabilities were found for `{target_url}`."
+                        ai_response = f"✅ **ZAP Scan Complete!** No obvious vulnerabilities were found for `{target_url}` within the time limit."
                     else:
                         ai_response = f"⚠️ **ZAP Scan Complete for `{target_url}`!**\n\nFound the following vulnerabilities:\n"
                         for alert in alerts:
@@ -1438,12 +1453,13 @@ def chat():
                     os.remove(report_path) # Clean up
                     
                 else:
-                    ai_response = f"❌ **Scan Failed:** ZAP did not generate a report.\n\nError Output: {process.stderr[-500:]}"
+                    ai_response = f"❌ **Scan Failed:** ZAP did not generate a report. It may have run out of memory internally.\n\nError Output: {process.stderr[-500:]}"
                     
                 return jsonify({'response': ai_response})
 
             except subprocess.TimeoutExpired:
-                return jsonify({'response': f"⏱️ **Scan Timeout:** The vulnerability scan for `{target_url}` took too long and was aborted."})
+                # Handle the timeout gracefully without crashing the server
+                return jsonify({'response': f"⏱️ **Scan Timeout:** The vulnerability scan for `{target_url}` took longer than 90 seconds. To prevent server crashes, the scan was safely aborted."})
             except Exception as e:
                 print(f"ZAP Execution Error: {e}")
                 return jsonify({'response': f"❌ **Error running ZAP:** {str(e)}"})
