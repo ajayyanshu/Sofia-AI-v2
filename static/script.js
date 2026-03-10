@@ -375,7 +375,7 @@ const translations = {
         used: 'उपयोग किया गया',
         contactUs: 'हमसे संपर्क करें',
         email: 'ईमेल',
-        telegram: 'टेलीগ্রাম',
+        telegram: 'टेलीग्राम',
         contactMessage: 'हमें आपसे जानकर खुशी होगी!'
     },
     'bn': { 
@@ -801,6 +801,7 @@ async function sendMessage() {
         messageInput.placeholder = translations[currentLang]['askAnything'] || "Ask anything";
     }
     
+    // --- THIS ADDS THE BLUE CIRCLE ANIMATION (Processing State) ---
     const typingIndicator = addTypingIndicator();
 
     let textToSend = text;
@@ -817,6 +818,7 @@ async function sendMessage() {
             })
         });
         
+        // --- THIS REMOVES THE BLUE CIRCLE ANIMATION ONCE FINISHED ---
         typingIndicator.remove();
 
         if (!response.ok) {
@@ -839,6 +841,7 @@ async function sendMessage() {
             messageIndex: currentMessageIndex 
         };
         
+        // --- THIS RENDERS THE FINISHED AI MESSAGE WITH THE GLOBE IMAGE ---
         const aiMessageElement = addMessage(aiMessage, currentMessageIndex);
         currentChat.push(aiMessage);
         
@@ -851,7 +854,7 @@ async function sendMessage() {
         }
 
     } catch (error) {
-        typingIndicator.remove();
+        typingIndicator.remove(); // Also remove loader on error
         console.error("API call failed:", error);
         
         const errorMessageText = `The AI service is currently unavailable. Please try again later.`;
@@ -900,7 +903,7 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
             modeHtml = `<div class="mt-2 flex items-center gap-1.5"><div class="flex-shrink-0 w-5 h-5 rounded-full ${bgClass} text-white flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span class="text-xs text-white/80">${modeText}</span></div>`;
         }
 
-        // --- NEW: Add Edit and Copy buttons for user message ---
+        // --- User message Edit and Copy buttons ---
         const userActionsHtml = `
             <div class="user-message-actions">
                 <button class="user-action-btn edit-user-btn" title="Edit message">
@@ -916,7 +919,7 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
         messageBubble.className = 'message-bubble user-message ml-auto group relative';
         chatContainer.appendChild(messageBubble);
 
-        // --- NEW: Event listeners for Edit and Copy ---
+        // Copy and Edit listeners
         const copyBtn = messageBubble.querySelector('.copy-user-btn');
         if (copyBtn) {
             copyBtn.addEventListener('click', () => {
@@ -947,6 +950,8 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
     } else if (sender === 'ai') {
         const aiMessageContainer = document.createElement('div');
         aiMessageContainer.className = 'ai-message-container';
+        
+        // --- THIS RENDERS THE IDLE GLOBE AVATAR ONCE FINISHED ---
         const avatar = `<div class="ai-avatar"><span class="text-2xl">🌎</span></div>`;
         const messageBubble = document.createElement('div');
         messageBubble.className = 'message-bubble ai-message';
@@ -1076,6 +1081,7 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
+// --- THIS ADDS THE TYPING / THINKING BLUE CIRCLE ---
 function addTypingIndicator() {
     const typingIndicatorContainer = document.createElement('div');
     typingIndicatorContainer.className = 'ai-message-container typing-indicator items-center';
