@@ -38,9 +38,9 @@ const clearAllFilesBtn = document.getElementById('clear-all-files-btn');
 const stopBtn = document.createElement('button');
 stopBtn.id = 'stop-btn';
 stopBtn.title = 'Stop generating';
-// Inverted colors: White background, Red icon
-stopBtn.className = 'hidden p-2 rounded-full bg-white text-red-600 border border-red-600 hover:bg-red-50 dark:bg-gray-800 dark:border-red-500 dark:text-red-500 dark:hover:bg-gray-700 transition-colors focus:outline-none flex items-center justify-center shadow-sm';
-stopBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1" ry="1"></rect></svg>`;
+// Premium, sleek design: Dark circle with white icon in light mode, White circle with dark icon in dark mode
+stopBtn.className = 'hidden p-2 rounded-full bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white transition-colors focus:outline-none flex items-center justify-center shadow-md';
+stopBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect></svg>`;
 
 // Insert the stop button right after the send button in the DOM
 if (sendBtn && sendBtn.parentNode) {
@@ -379,7 +379,7 @@ const translations = {
         search: 'खोजें', 
         sofiaTitle: 'सोफिया एआई',
         uploadCode: 'कोड अपलोड करें',
-        usagePlan: 'उपयोग और योजना',
+        usagePlan: 'ব্যবহার এবং পরিকল্পনা',
         delete: 'हटाएं',
         emailVerification: 'ईमेल सत्यापन',
         logoutAllDevices: 'सभी उपकरणों से लॉग आउट करें',
@@ -835,10 +835,10 @@ async function sendMessage() {
     micBtn.classList.add('hidden');
     voiceModeBtn.classList.add('hidden');
     webSearchToggleBtn.classList.add('hidden');
-    addBtn.classList.add('hidden');
     sendBtn.classList.add('hidden');
+    // We NO LONGER hide the addBtn here, so the + icon stays visible!
     
-    // --- SHOW THE NEW SQUARE-IN-CIRCLE STOP BUTTON ---
+    // --- SHOW THE NEW PREMIUM STOP BUTTON ---
     stopBtn.classList.remove('hidden');
 
     let textToSend = text;
@@ -936,7 +936,6 @@ async function sendMessage() {
         micBtn.classList.toggle('hidden', hasText);
         voiceModeBtn.classList.toggle('hidden', hasText);
         webSearchToggleBtn.classList.remove('hidden');
-        addBtn.classList.remove('hidden');
         sendBtn.classList.toggle('hidden', !shouldShowSend);
     }
 }
