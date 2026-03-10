@@ -44,7 +44,7 @@ body {
     width: fit-content;
 }
 
-/* NEW: User Message Action Buttons (Edit / Copy) */
+/* User Message Action Buttons (Edit / Copy) */
 .user-message-actions {
     display: flex;
     justify-content: flex-end;
@@ -113,7 +113,7 @@ body {
 .system-message { background-color: #f87171; color: white; align-self: center; text-align: center; font-size: 0.875rem; padding: 0.5rem 1rem; }
 #message-input { resize: none; overflow-y: hidden; max-height: 150px; }
 
-/* UPDATED: File preview container for multiple files */
+/* File preview container for multiple files */
 #file-preview-container {
     display: flex;
     flex-wrap: wrap;
@@ -124,7 +124,7 @@ body {
     width: 100%;
 }
 
-/* UPDATED: Preview item styling for multiple files */
+/* Preview item styling for multiple files */
 .preview-item {
     position: relative;
     border-radius: 0.5rem;
@@ -278,7 +278,7 @@ body.initial-view #welcome-message-container { flex-grow: 0; }
 }
 .sidebar-item {
      display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 0.5rem; cursor: pointer;
-     color: #374151; font-medium;
+     color: #374151; font-weight: 500;
 }
 .sidebar-item:hover { background-color: #e5e7eb; }
 .chat-history-item {
@@ -326,7 +326,7 @@ body.initial-view #welcome-message-container { flex-grow: 0; }
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-/* UPDATED: Improved multiple file preview styling */
+/* Improved multiple file preview styling */
 .preview-counter {
     position: absolute;
     top: -8px;
@@ -376,7 +376,7 @@ body.initial-view #welcome-message-container { flex-grow: 0; }
     color: #ffffff;
 }
 .dark body { background-color: #000000; }
-.dark #sidebar { background-color: #111111; border-r-color: #292929;}
+.dark #sidebar { background-color: #111111; border-right-color: #292929;}
 .dark .sidebar-item { color: #e0e0e0; }
 .dark .sidebar-item:hover { background-color: #252525; }
 .dark .chat-history-item { color: #a0a0a0; }
@@ -392,7 +392,7 @@ body.initial-view #welcome-message-container { flex-grow: 0; }
 .dark .menu-item:hover { background-color: #252525; }
 .dark .text-gray-700 { color: #e0e0e0; }
 .dark .text-gray-500 { color: #a0a0a0; }
-.dark header { background-color: #000000; border-b-color: #292929; }
+.dark header { background-color: #000000; border-bottom-color: #292929; }
 .dark main.chat-area { background-color: #000000; }
 .dark #welcome-message-container h1 { color: #f0f0f0; }
 .dark footer { background-color: #000000; }
@@ -457,10 +457,7 @@ body.initial-view #welcome-message-container { flex-grow: 0; }
     color: #fee2e2;
 }
 
-/*
- * Code Block Styling (Prism.js)
- */
-
+/* Code Block Styling (Prism.js) */
 .ai-message pre {
     position: relative;
     background-color: #272822; /* Matches Okaidia theme */
@@ -507,86 +504,43 @@ body.initial-view #welcome-message-container { flex-grow: 0; }
     background-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Make sure code inside the <pre> block is not styled by Prism's default */
 :not(pre) > code[class*="language-"],
 pre[class*="language-"] {
-    background: transparent; /* Makes the pre background visible */
+    background: transparent;
 }
 
-/* * ==================================================
- * ANIMATIONS & VISUAL ENHANCEMENTS
- * ==================================================
- */
 
-/* 1. Breathing Gradient Background (Welcome Screen) */
-/* Adds a subtle moving gradient to the white background */
-body.initial-view {
-    background: linear-gradient(-45deg, #f8fafc, #e0e7ff, #f3e8ff, #e0f2fe);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-}
-
-/* Dark Mode Gradient Override */
-.dark body.initial-view {
-    background: linear-gradient(-45deg, #000000, #111827, #1e1b4b, #0f172a);
-    background-size: 400% 400%;
-}
-
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* 2. Typing Cursor Effect */
-/* Used by the JavaScript typewriter effect */
+/* 1. Typing Cursor Effect */
 .typing-cursor::after {
     content: '|';
     margin-left: 5px;
-    color: #4f46e5; /* Indigo color */
+    color: #4f46e5;
     animation: blink 1s step-start infinite;
     font-weight: bold;
 }
 .dark .typing-cursor::after {
-    color: #818cf8; /* Lighter indigo for dark mode */
+    color: #818cf8;
 }
 
 @keyframes blink {
     50% { opacity: 0; }
 }
 
-/* 3. Floating Input Bar */
-/* Gives the input bar a gentle float on the welcome screen */
-body.initial-view footer .max-w-3xl {
-    animation: floatInput 6s ease-in-out infinite;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-}
-.dark body.initial-view footer .max-w-3xl {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-}
-
-@keyframes floatInput {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-8px); }
-    100% { transform: translateY(0px); }
-}
-
-/* 4. Gradient Text for Header Logo */
+/* 2. Gradient Text for Header Logo */
 header .text-indigo-600 {
     background: linear-gradient(to right, #4f46e5, #9333ea);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-weight: 800; /* Bolder text to make the gradient visible */
+    font-weight: 800;
 }
 
-/* Adjust gradient for dark mode readability */
 .dark header .text-indigo-600 {
     background: linear-gradient(to right, #818cf8, #c084fc);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* 5. File Upload Animation */
+/* 3. File Upload Animation */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -596,39 +550,16 @@ header .text-indigo-600 {
     animation: fadeIn 0.3s ease-out;
 }
 
-/* 6. Scrollbar styling for file preview container */
-#file-preview-container::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
+/* 4. Scrollbar styling for file preview container */
+#file-preview-container::-webkit-scrollbar { width: 6px; height: 6px; }
+#file-preview-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+#file-preview-container::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+#file-preview-container::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+.dark #file-preview-container::-webkit-scrollbar-track { background: #374151; }
+.dark #file-preview-container::-webkit-scrollbar-thumb { background: #6b7280; }
+.dark #file-preview-container::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
-#file-preview-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-#file-preview-container::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-#file-preview-container::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-.dark #file-preview-container::-webkit-scrollbar-track {
-    background: #374151;
-}
-
-.dark #file-preview-container::-webkit-scrollbar-thumb {
-    background: #6b7280;
-}
-
-.dark #file-preview-container::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
-}
-
-/* 7. File count indicator */
+/* 5. File count indicator */
 .file-count-indicator {
     display: inline-flex;
     align-items: center;
@@ -643,18 +574,18 @@ header .text-indigo-600 {
     font-weight: bold;
 }
 
-/* 8. Improved button transitions */
+/* 6. Improved button transitions */
 button, .menu-item, .sidebar-item, .action-btn, .remove-preview-btn {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 9. Enhanced focus states */
+/* 7. Enhanced focus states */
 button:focus, input:focus, textarea:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
 }
 
-/* 10. Smooth hover effects */
+/* 8. Smooth hover effects */
 .hover-lift:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
@@ -667,8 +598,8 @@ button:focus, input:focus, textarea:focus {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85); /* Dark background */
-    z-index: 9999; /* On top of everything */
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -676,31 +607,17 @@ button:focus, input:focus, textarea:focus {
     backdrop-filter: blur(5px);
 }
 
-.loader-content {
-    text-align: center;
-    color: white;
-}
-
-.loader-content p {
-    margin-top: 20px;
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    animation: pulseText 2s infinite;
-}
+.loader-content { text-align: center; color: white; }
+.loader-content p { margin-top: 20px; font-size: 18px; font-weight: 500; letter-spacing: 0.5px; animation: pulseText 2s infinite; }
 
 .spinner {
     width: 60px;
     height: 60px;
     border: 5px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
-    border-top-color: #4f46e5; /* Indigo-600 to match theme */
+    border-top-color: #4f46e5;
     animation: spin 1s ease-in-out infinite;
     margin: 0 auto;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
 }
 
 @keyframes pulseText {
@@ -717,21 +634,16 @@ button:focus, input:focus, textarea:focus {
     animation: skeleton-pulse 1.5s infinite ease-in-out;
 }
 
-.dark .history-skeleton-item {
-    background-color: rgba(255, 255, 255, 0.05);
-}
+.dark .history-skeleton-item { background-color: rgba(255, 255, 255, 0.05); }
 
 .skeleton-line {
     height: 10px;
-    background-color: #cbd5e1; /* Light gray */
+    background-color: #cbd5e1;
     border-radius: 4px;
     margin-bottom: 6px;
 }
 
-.dark .skeleton-line {
-    background-color: #4b5563; /* Dark gray */
-}
-
+.dark .skeleton-line { background-color: #4b5563; }
 .skeleton-line.title { width: 70%; height: 12px; }
 .skeleton-line.subtitle { width: 40%; }
 
@@ -743,28 +655,11 @@ button:focus, input:focus, textarea:focus {
 
 /* --- Responsive Improvements --- */
 @media (max-width: 640px) {
-    .preview-item.image-preview {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .preview-item.doc-preview {
-        width: 100px;
-        height: 60px;
-    }
-    
-    .message-bubble {
-        max-width: 90%;
-    }
-    
-    #file-preview-container {
-        max-height: 120px;
-    }
-    
-    .preview-item .file-name-tag {
-        font-size: 8px;
-        padding: 1px 3px;
-    }
+    .preview-item.image-preview { width: 60px; height: 60px; }
+    .preview-item.doc-preview { width: 100px; height: 60px; }
+    .message-bubble { max-width: 90%; }
+    #file-preview-container { max-height: 120px; }
+    .preview-item .file-name-tag { font-size: 8px; padding: 1px 3px; }
 }
 
 /* --- Accessibility Improvements --- */
@@ -782,16 +677,8 @@ button:focus, input:focus, textarea:focus {
     footer, #add-menu, #user-menu, #mode-indicator-container, .message-actions {
         display: none !important;
     }
-    
-    body, .chat-container {
-        overflow: visible !important;
-        height: auto !important;
-    }
-    
-    .message-bubble {
-        max-width: 100% !important;
-        break-inside: avoid;
-    }
+    body, .chat-container { overflow: visible !important; height: auto !important; }
+    .message-bubble { max-width: 100% !important; break-inside: avoid; }
 }
 
 /* --- Utility Classes --- */
@@ -802,13 +689,8 @@ button:focus, input:focus, textarea:focus {
     overflow: hidden;
 }
 
-.file-preview-fade-in {
-    animation: fadeIn 0.3s ease-out;
-}
-
-.hover-scale:hover {
-    transform: scale(1.05);
-}
+.file-preview-fade-in { animation: fadeIn 0.3s ease-out; }
+.hover-scale:hover { transform: scale(1.05); }
 
 /* --- File type specific colors --- */
 .file-type-image { border-left: 3px solid #3b82f6; }
