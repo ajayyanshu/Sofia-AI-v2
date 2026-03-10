@@ -375,7 +375,7 @@ const translations = {
         used: 'उपयोग किया गया',
         contactUs: 'हमसे संपर्क करें',
         email: 'ईमेल',
-        telegram: 'टेलीग्राम',
+        telegram: 'टेलीগ্রাম',
         contactMessage: 'हमें आपसे जानकर खुशी होगी!'
     },
     'bn': { 
@@ -900,9 +900,47 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
             modeHtml = `<div class="mt-2 flex items-center gap-1.5"><div class="flex-shrink-0 w-5 h-5 rounded-full ${bgClass} text-white flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div><span class="text-xs text-white/80">${modeText}</span></div>`;
         }
 
-        messageBubble.innerHTML = fileHtml + `<div>${text}</div>` + modeHtml;
-        messageBubble.className = 'message-bubble user-message ml-auto';
+        // --- NEW: Add Edit and Copy buttons for user message ---
+        const userActionsHtml = `
+            <div class="user-message-actions">
+                <button class="user-action-btn edit-user-btn" title="Edit message">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                </button>
+                <button class="user-action-btn copy-user-btn" title="Copy message">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                </button>
+            </div>
+        `;
+
+        messageBubble.innerHTML = fileHtml + `<div>${text}</div>` + modeHtml + userActionsHtml;
+        messageBubble.className = 'message-bubble user-message ml-auto group relative';
         chatContainer.appendChild(messageBubble);
+
+        // --- NEW: Event listeners for Edit and Copy ---
+        const copyBtn = messageBubble.querySelector('.copy-user-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalIcon = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<span class="text-xs font-semibold">Copied!</span>';
+                    setTimeout(() => copyBtn.innerHTML = originalIcon, 2000);
+                });
+            });
+        }
+
+        const editBtn = messageBubble.querySelector('.edit-user-btn');
+        if (editBtn) {
+            editBtn.addEventListener('click', () => {
+                const inputField = document.getElementById('message-input');
+                inputField.value = text;
+                inputField.focus();
+                inputField.style.height = 'auto';
+                inputField.style.height = `${inputField.scrollHeight}px`;
+                document.getElementById('send-btn').classList.remove('hidden');
+                document.getElementById('mic-btn').classList.add('hidden');
+                document.getElementById('voice-mode-btn').classList.add('hidden');
+            });
+        }
 
         return messageBubble;
 
