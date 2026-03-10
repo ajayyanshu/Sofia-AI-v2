@@ -43,6 +43,43 @@ body {
     border-bottom-right-radius: 0.5rem;
     width: fit-content;
 }
+
+/* NEW: User Message Action Buttons (Edit / Copy) */
+.user-message-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.user-message:hover .user-message-actions {
+    opacity: 1;
+}
+
+.user-action-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    cursor: pointer;
+    color: white;
+    padding: 0.35rem;
+    border-radius: 9999px;
+    transition: background-color 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-action-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.user-action-btn:active {
+    transform: scale(0.95);
+}
+
 .ai-message {
     background-color: #e5e7eb;
     color: #1f2937;
