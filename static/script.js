@@ -83,6 +83,9 @@ let chatHistory = [];
 let currentChat = [];
 let currentChatId = null;
 
+// ADDED: AbortController to handle stopping message generation
+let currentAbortController = null;
+
 // Track message indices for feedback
 let currentMessageIndex = 0;
 
@@ -375,7 +378,7 @@ const translations = {
         used: 'उपयोग किया गया',
         contactUs: 'हमसे संपर्क करें',
         email: 'ईमेल',
-        telegram: 'टेलीग्राम',
+        telegram: 'टेलीগ্রাম',
         contactMessage: 'हमें आपसे जानकर खुशी होगी!'
     },
     'bn': { 
@@ -805,6 +808,9 @@ async function sendMessage() {
     const typingIndicator = addTypingIndicator();
 
     let textToSend = text;
+    
+    // 1. Initialize the AbortController
+    currentAbortController = new AbortController();
 
     try {
         const response = await fetch('/chat', {
@@ -815,7 +821,8 @@ async function sendMessage() {
                 filesData: currentFilesData, 
                 isTemporary: isTemporaryChatActive,
                 mode: modeForThisMessage 
-            })
+            }),
+            signal: currentAbortController.signal // 2. Attach the abort signal here
         });
         
         // --- THIS REMOVES THE BLUE CIRCLE ANIMATION ONCE FINISHED ---
@@ -855,6 +862,20 @@ async function sendMessage() {
 
     } catch (error) {
         typingIndicator.remove(); // Also remove loader on error
+        
+        // 3. Handle the Abort Action
+        if (error.name === 'AbortError') {
+            console.log("Generation stopped by user.");
+            const stoppedMessage = {
+                text: '⚠️ *Generation stopped by user.*',
+                sender: 'system'
+            };
+            addMessage(stoppedMessage);
+            currentChat.push(stoppedMessage);
+            saveChatSession();
+            return; // Exit out of the function early
+        }
+
         console.error("API call failed:", error);
         
         const errorMessageText = `The AI service is currently unavailable. Please try again later.`;
@@ -868,6 +889,9 @@ async function sendMessage() {
          if (isVoiceConversationActive) {
             speakText(errorMessageText, startListening);
         }
+    } finally {
+        // 4. Clean up the controller
+        currentAbortController = null;
     }
 }
 
@@ -1084,17 +1108,36 @@ function addMessage({text, sender, fileInfo = null, mode = null}, messageIndex =
 // --- THIS ADDS THE TYPING / THINKING BLUE CIRCLE ---
 function addTypingIndicator() {
     const typingIndicatorContainer = document.createElement('div');
-    typingIndicatorContainer.className = 'ai-message-container typing-indicator items-center';
+    typingIndicatorContainer.className = 'ai-message-container typing-indicator items-center flex justify-between w-full pr-4';
+    
     const animatedAvatarHTML = `
-        <div class="ai-avatar-animated">
-            <div class="orbiting-circle"></div>
-            <span class="globe text-2xl">🌎</span>
+        <div class="flex items-center">
+            <div class="ai-avatar-animated">
+                <div class="orbiting-circle"></div>
+                <span class="globe text-2xl">🌎</span>
+            </div>
+            <span class="text-gray-600 font-medium ml-2">Just a sec...</span>
         </div>
-        <span class="text-gray-600 font-medium ml-2">Just a sec...</span>
+        <button id="stop-generation-btn" class="ml-4 px-3 py-1 bg-red-100 text-red-600 border border-red-200 rounded-lg hover:bg-red-200 text-sm font-medium transition-colors flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" /></svg>
+            Stop
+        </button>
     `;
+    
     typingIndicatorContainer.innerHTML = animatedAvatarHTML;
     chatContainer.appendChild(typingIndicatorContainer);
     chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // Add event listener to cancel the request when clicked
+    const stopBtn = document.getElementById('stop-generation-btn');
+    if (stopBtn) {
+        stopBtn.addEventListener('click', () => {
+            if (currentAbortController) {
+                currentAbortController.abort(); // Triggers the AbortError
+            }
+        });
+    }
+
     return typingIndicatorContainer;
 }
 
