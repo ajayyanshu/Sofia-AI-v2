@@ -456,7 +456,7 @@ def home():
 def login_page():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-    return render_template('website.html')
+    return render_template('login.html')
 
 @app.route('/signup.html', methods=['GET'])
 def signup_page():
